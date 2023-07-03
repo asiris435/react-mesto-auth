@@ -1,0 +1,9 @@
+.profile__image-pencil {
+    width: 10px;
+}
+
+@media screen and (max-width: 1159px) {
+    .profile__image-pencil {
+        width: 7.5px;
+    }
+}

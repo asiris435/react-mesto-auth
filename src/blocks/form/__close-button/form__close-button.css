@@ -1,0 +1,15 @@
+.form__close-button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    padding: 0;
+    background: transparent;
+    position: absolute;
+    right: -40px;
+    top: -40px;
+}
+
+.form__close-button:hover {
+    cursor: pointer;
+    opacity: 0.6;
+}
