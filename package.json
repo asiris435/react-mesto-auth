@@ -1,6 +1,6 @@
 {
-  "homepage": "https://asiris435.github.io/mesto-react-auth/",
-  "name": "mesto-react-auth",
+  "homepage": "https://asiris435.github.io/react-mesto-auth/",
+  "name": "react-mesto-auth",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

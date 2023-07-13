@@ -1,5 +1,5 @@
 # __Mesto__
-https://asiris435.github.io/mesto-react-auth/
+https://asiris435.github.io/react-mesto-auth/
 >## Цель проекта Mesto: 
 >#### _Создать страницу с возможностью рассказать о себе и об интересных местах России._   
 
