@@ -9,19 +9,30 @@ import api from "../utils/api.js";
 import EditProfilePopup from "./editProfilePopup/EditProfilePopup.jsx";
 import EditAvatarPopup from "./editAvatarPopup/EditAvatarPopup.jsx";
 import AddPlacePopup from "./addPlacePopup/AddPlacePopup.jsx";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import ProtectedComponent from "./protectedComponent/ProtectedComponent.jsx";
+import SendingContext from "../contexts/SendingContext.js";
+import ProtectedRoute from "./protectedRoute/ProtectedRoute.jsx";
+import InfoTooltip from "./infoTooltip/InfoTooltip.jsx";
+import { registration, authorization, getUserData } from "../utils/auth.js";
 
 function App () {
+  const navigate = useNavigate();
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
+  const [isResultLoginPopupOpen, setIsResultLoginPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState({});
   const [isSending, setIsSending] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
   const [cards, setCards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteCardId, setDeleteCardId] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [isSuccessful, setIsSaccessful] = useState(false);
 
   function handleEditProfileClick () {
     setIsEditProfilePopupOpen(true);
@@ -46,6 +57,7 @@ function App () {
     setIsEditAvatarPopupOpen(false);
     setIsDeletePopupOpen(false);
     setIsImagePopupOpen(false);
+    setIsResultLoginPopupOpen(false);
   }
 
   function handleCardClick (card) {
@@ -107,7 +119,42 @@ function App () {
     .finally(() => setIsSending(false));
   }
 
+  function handleRegistration (password, email) {
+    setIsSending(true);
+    registration(password, email)
+    .then(() => {
+      setIsResultLoginPopupOpen(true);
+      setIsSaccessful(true);
+      window.scrollTo(0, 0);
+      navigate("/sign-in");
+    })
+    .catch((err) => {
+      setIsResultLoginPopupOpen(true);
+      setIsSaccessful(false);
+      console.error(err);
+    })
+    .finally(() => setIsSending(false));
+  }
+
+  function handleLogin (password, email) {
+    setIsSending(true);
+    authorization(password, email)
+    .then((res) => {
+      localStorage.setItem("jwt", res.token);
+      setLoggedIn(true);
+      window.scrollTo(0, 0);
+      navigate("/");
+    })
+    .catch((err) => {
+      setIsResultLoginPopupOpen(true);
+      setIsSaccessful(false);
+      console.error(err);
+    })
+    .finally(() => setIsSending(false));
+  }
+
   useEffect (() => {
+    if (loggedIn) {
     setIsLoading(true);
     Promise.all([api.getUserProfileInfo(), api.getInitialCards()])
       .then(([userData, cardData]) => {
@@ -116,23 +163,57 @@ function App () {
         setIsLoading(false);
       })
       .catch((err) => console.error(err));
-  }, []);
+    }
+  }, [loggedIn]);
+
+  useEffect (() => {
+    if (localStorage.jwt) {
+      getUserData(localStorage.jwt)
+        .then((res) => {
+          setUserEmail(res.data.email);
+          setLoggedIn(true);
+          navigate("/");
+        })
+        .catch((err) => console.error(err));
+    } else {
+      setLoggedIn(false);
+    }
+  }, [navigate]);
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page__content">
         <div className="root">
-          <Header />
 
-          <Main 
-            onEditProfile={handleEditProfileClick}
-            onAddPlace={handleAddPlaceClick}
-            onEditAvatar={handleEditAvatarClick}
-            onCardClick={handleCardClick}
-            cards={cards}
-            isLoading={isLoading}
-            onClickDelete={handleDeletePopupClick}
-          />
+          <SendingContext.Provider value={isSending}>
+            <Routes>
+              <Route path="/" element={<ProtectedRoute
+                element={ProtectedComponent}
+                userEmail={userEmail}
+                onEditProfile={handleEditProfileClick}
+                onAddPlace={handleAddPlaceClick}
+                onEditAvatar={handleEditAvatarClick}
+                onCardClick={handleCardClick}
+                cards={cards}
+                isLoading={isLoading}
+                onClickDelete={handleDeletePopupClick}
+                loggedIn={loggedIn} />
+              } />
+              <Route path="/sign-up" element={
+                <>
+                  <Header name="signup" />
+                  <Main name="signup" handleRegistration={handleRegistration} />
+                </>
+              } />
+              <Route path="/sign-in" element={
+                <>
+                  <Header name="signin" />
+                  <Main name="signin" handleLogin={handleLogin} />
+                </>
+              } />
+              <Route path="*" element={<Navigate to="/" replace />}/>
+            </Routes>
+          </SendingContext.Provider>
 
           <Footer />
 
@@ -170,6 +251,13 @@ function App () {
           <ImagePopup
             card={selectedCard}
             isOpen={isImagePopupOpen}
+            onClose={closeAllPopups}
+          />
+
+          <InfoTooltip
+            name="resultLogin"
+            isSuccessful={isSuccessful}
+            isOpen={isResultLoginPopupOpen}
             onClose={closeAllPopups}
           />
         </div>

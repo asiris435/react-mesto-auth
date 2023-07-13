@@ -1,4 +1,26 @@
+import { useEffect } from "react";
+
 function PopupWithForm ({ name, title, textButton, children, isOpen, onClose, onSubmit, isSending, isValid=true }) {
+  useEffect(() => {
+    function handleEscapeClose (event) {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    }
+    function handleOverlayClose (event) {
+      if (event.target.classList.contains("popup")) {
+        onClose();
+      }
+    }
+    document.addEventListener("keydown", handleEscapeClose);
+    document.addEventListener("mousedown", handleOverlayClose);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscapeClose);
+      document.removeEventListener("mousedown", handleOverlayClose);
+    }
+  }, [onClose]);
+
   return (
     <section aria-label="form" className={`popup popup_type_${name} ${isOpen ? "popup_opened" : ""}`}>
       <div className="popup__container">
