@@ -1,8 +1,12 @@
-import useFormValidation from "../../hooks/useFormValidation";
-import LoginSection from "../loginSection/LoginSection";
+import { useContext } from "react";
+import useFormValidation from "../../hooks/useFormValidation.js";
+import LoginSection from "../loginSection/LoginSection.jsx";
+import SendingContext from "../../contexts/SendingContext.js";
+
 
 function Login ({ name, handleLogin }) {
     const { values, errors, isValid, isInputValid, handleChange } = useFormValidation();
+    const isSending = useContext(SendingContext);
 
     function onLogin (event) {
         event.preventDefault();
@@ -18,6 +22,7 @@ function Login ({ name, handleLogin }) {
                 className={`form__input-text ${isInputValid.email === undefined || isInputValid.email ? "" : "form__input-text_invalid"}`}
                 value={values.email || ""}
                 onChange={handleChange}
+                disabled={isSending}
             />
             <span
               id="input-email-error"
@@ -32,6 +37,7 @@ function Login ({ name, handleLogin }) {
                 minLength={3}
                 value={values.password || ""}
                 onChange={handleChange}
+                disabled={isSending}
             />
             <span
               id="input-email-error"
