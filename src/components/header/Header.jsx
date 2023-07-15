@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import logo from "../../images/Logo.svg";
 
-function Header ({ name, dataUser }) {
+function Header ({ name, userEmail, setLoggedIn }) {
 
 function onSignOut () {
   localStorage.removeItem("jwt");
+  setLoggedIn(false);
 }
 
   return (
@@ -21,7 +22,7 @@ function onSignOut () {
         :
         <>
           <div className="header__nav-container">
-            <p className="header__email">{dataUser}</p>
+            <p className="header__email">{userEmail}</p>
             <Link to={"/sign-in"} className="header__unlogin" onClick={onSignOut}>Выйти</Link>
           </div>
         </>

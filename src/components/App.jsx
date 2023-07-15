@@ -16,6 +16,7 @@ import ProtectedRoute from "./protectedRoute/ProtectedRoute.jsx";
 import InfoTooltip from "./infoTooltip/InfoTooltip.jsx";
 import { registration, authorization, getUserData } from "../utils/auth.js";
 
+
 function App () {
   const navigate = useNavigate();
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -166,19 +167,23 @@ function App () {
     }
   }, [loggedIn]);
 
-  useEffect (() => {
-    if (localStorage.jwt) {
-      getUserData(localStorage.jwt)
-        .then((res) => {
-          setUserEmail(res.data.email);
-          setLoggedIn(true);
-          navigate("/");
-        })
-        .catch((err) => console.error(err));
+  const tokenCheck = () => {
+    const jwt = localStorage.getItem("jwt");
+    if (jwt) {
+      getUserData(jwt)
+      .then((res) => {
+        setUserEmail(res.data.email);
+        setLoggedIn(true);
+      })
+      .catch((err) => console.error(err));
     } else {
       setLoggedIn(false);
     }
-  }, [navigate]);
+  }
+
+  useEffect (() => {
+    tokenCheck();
+  }, [loggedIn]);
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
@@ -189,6 +194,7 @@ function App () {
             <Routes>
               <Route path="/" element={<ProtectedRoute
                 element={ProtectedComponent}
+                setLoggedIn={setLoggedIn}
                 userEmail={userEmail}
                 onEditProfile={handleEditProfileClick}
                 onAddPlace={handleAddPlaceClick}
@@ -206,6 +212,7 @@ function App () {
                 </>
               } />
               <Route path="/sign-in" element={
+                loggedIn ? <Navigate to={"/"} /> :
                 <>
                   <Header name="signin" />
                   <Main name="signin" handleLogin={handleLogin} />

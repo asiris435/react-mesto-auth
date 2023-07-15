@@ -1,10 +1,11 @@
 import Header from "../header/Header";
 import Main from "../main/Main";
 
-function ProtectedComponent ({ userEmail, ...props }) {
+
+function ProtectedComponent ({ userEmail, setLoggedIn, ...props }) {
     return (
         <>
-            <Header dataUser={userEmail} />
+            <Header userEmail={userEmail} setLoggedIn={setLoggedIn} />
             <Main name="main" {...props} />
         </>
     );
