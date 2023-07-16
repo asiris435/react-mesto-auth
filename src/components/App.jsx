@@ -142,6 +142,7 @@ function App () {
     authorization(password, email)
     .then((res) => {
       localStorage.setItem("jwt", res.token);
+      setUserEmail(email);
       setLoggedIn(true);
       window.scrollTo(0, 0);
       navigate("/");
@@ -183,7 +184,7 @@ function App () {
 
   useEffect (() => {
     tokenCheck();
-  }, [loggedIn]);
+  }, []);
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
